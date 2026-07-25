@@ -41,9 +41,37 @@ connectDB();
 
 // Security middleware
 app.use(helmet());
+
+// -----------------------------------------------------
+// CORS
+// CLIENT_URLS (preferred) accepts a comma-separated list of allowed
+// origins, e.g. "https://ayush-portfolio-swart.vercel.app,https://your-netlify-site.netlify.app"
+// CLIENT_URL (legacy/single-value) is still supported for backward
+// compatibility. http://localhost:5173 is always allowed for local dev.
+// Never use "*" here — the app sends credentials (JWT/cookies), and
+// CORS forbids Access-Control-Allow-Origin: "*" together with
+// Access-Control-Allow-Credentials: true.
+// -----------------------------------------------------
+const configuredOrigins = (process.env.CLIENT_URLS || process.env.CLIENT_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins = Array.from(new Set(["http://localhost:5173", ...configuredOrigins]));
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      // Allow non-browser requests (no Origin header — e.g. curl, health checks, server-to-server)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.warn(`[cors] Blocked request from disallowed origin: ${origin}`);
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
