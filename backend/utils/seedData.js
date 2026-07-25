@@ -109,28 +109,18 @@ const seed = async () => {
     }
 
     // Admin user (idempotent — won't duplicate on re-run)
-    const existingAdmin = await User.findOne({
-  email: process.env.ADMIN_EMAIL,
-}).select("+password");
-
-if (!existingAdmin) {
-  await User.create({
-    name: "Ayush Chauhan",
-    email: process.env.ADMIN_EMAIL,
-    password: process.env.ADMIN_PASSWORD,
-    role: "admin",
-  });
-
-  console.log("[seed] Admin user created");
-} else {
-  existingAdmin.name = "Ayush Chauhan";
-  existingAdmin.password = process.env.ADMIN_PASSWORD;
-  existingAdmin.role = "admin";
-
-  await existingAdmin.save();
-
-  console.log("[seed] Admin user updated");
-}
+    const existingAdmin = await User.findOne({ email: process.env.ADMIN_EMAIL });
+    if (!existingAdmin) {
+      await User.create({
+        name: "Ayush Chauhan",
+        email: process.env.ADMIN_EMAIL,
+        password: process.env.ADMIN_PASSWORD,
+        role: "admin",
+      });
+      console.log("[seed] Admin user created");
+    } else {
+      console.log("[seed] Admin user already exists, skipping");
+    }
 
     await Project.deleteMany();
     await Project.insertMany(projects);

@@ -20,6 +20,10 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(uri);
     console.log(`[db] MongoDB connected: ${conn.connection.host}`);
+    // [AUTH DEBUG] --- temporary, remove after root cause is identified ---
+    console.log(`[AUTH DEBUG] Connected database name: "${conn.connection.name}"`);
+    console.log(`[AUTH DEBUG] Connection readyState: ${conn.connection.readyState}`);
+    // [AUTH DEBUG] --- end block ---
   } catch (error) {
     console.error(`[db] Connection error: ${error.message}`);
     process.exit(1);
